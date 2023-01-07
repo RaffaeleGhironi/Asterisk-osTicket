@@ -1,0 +1,404 @@
+#!/usr/bin/php -q
+<?php
+/////////////////////////////////////////////
+//asterisk
+require 'phpagi.php';
+$agi = new AGI();
+$tipo=$argv[1];
+$chiamante=$argv[2];
+$coda=$argv[3];
+$dataora=date('r',$argv[4]);key
+/////////////////////////////////////////////
+//Database ASterisk
+$dbhost_a="XXX-ASTERISKIP-XXX";
+$dbuser_a = "XXX-ASTERISKDBUSER-XXX";
+$dbpass_a = "XXX-ASTERISKDNPASSWORS-XXX";
+$conn_a=mysql_connect($dbhost_a,$dbuser_a,$dbpass_a)or die("impossibile accedere");
+////////////////////////////////////////////
+//leggi il nome della coda
+$nome_coda=leggi_nome_coda($coda);
+mysql_close();
+
+/////////////////////////////////////////////
+//Database
+$dbhost="XXX-osTICKETIP-XXX";
+$dbuser = "XXX-osTICKETDBUSER-XXX";
+$dbpass = "XXX-osTICKETDBPASSWORD-XXX";
+$conn=mysql_connect($dbhost,$dbuser,$dbpass)or die("impossibile accedere");
+////////////////////////////////////////////
+
+
+switch ($tipo) {
+    case 'pin':
+        $pin=$argv[5];
+        $agi->set_variable("pin",$pin);
+        ///// recupera l' entry_id
+        $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$pin."' ";
+        $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
+        $nr_entry_id = mysql_num_rows($res_entry_id);
+        $records_entry_id=mysql_fetch_assoc($res_entry_id);
+        if($records_entry_id)
+        {
+            $entry_id=$records_entry_id['entry_id'];
+            $agi->set_variable("entry_id",$entry_id);
+            $object_id=leggi_object_id($entry_id);
+            $agi->set_variable("object_id",$object_id);
+            $name=leggi_nome($object_id);
+            $agi->set_variable("name",$name);
+            $mail=leggi_mail($object_id);
+            $agi->set_variable("mail",$mail);
+            $company=leggi_company($entry_id);
+            $agi->set_variable("company",$company);
+            $agi->set_variable("nome_coda",$nome_coda);   
+        }else{
+            $agi->set_variable("entry_id","false");  
+        }
+
+    break;
+
+    case 'numero':        
+        ///// recupera l' entry_id
+        $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
+        $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
+        $nr_entry_id = mysql_num_rows($res_entry_id);
+        $records_entry_id=mysql_fetch_assoc($res_entry_id);
+        if($records_entry_id)
+        {
+            $entry_id=$records_entry_id['entry_id'];
+            $agi->set_variable("entry_id",$entry_id);
+            $object_id=leggi_object_id($entry_id);
+            $agi->set_variable("object_id",$object_id);
+            $name=leggi_nome($object_id);
+            $agi->set_variable("name",$name);
+            $mail=leggi_mail($object_id);
+            $agi->set_variable("mail",$mail);
+            $company=leggi_company($entry_id);
+            $agi->set_variable("company",$company);
+            $agi->set_variable("nome_coda",$nome_coda);   
+        }else{
+            $agi->set_variable("entry_id","false"); 
+        }
+
+    break;
+
+    case 'recall':
+        $recall=$argv[5];
+        $agi->set_variable("recall",$recall); 
+        ///// recupera lo user_id
+        $sql_user_id="select user_id from osticket.ost_user__cdata where  phone ='".$chiamante."' ";
+        $res_user_id=mysql_query($sql_user_id) OR die(mysql_error());
+        $nr_user_id = mysql_num_rows($res_user_id);
+        $records_user_id=mysql_fetch_assoc($res_user_id);
+        if($records_user_id)
+        {
+            $user_id=$records_user_id['user_id'];
+            $agi->set_variable("user_id","true");
+            $mail=leggi_mail($user_id);
+            $name=leggi_nome($user_id);
+            
+            $ticket_id=crea_ticket('recall',$name,$mail,$chiamante,$coda,$dataora);
+            $agi->set_variable("ticketid",$ticket_id);
+            
+            
+        }else{
+            $agi->set_variable("user_id","false");  
+        }
+    break;
+
+    case 'cli':        
+        ///// recupera l' entry_id
+        $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
+        $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
+        $nr_entry_id = mysql_num_rows($res_entry_id);
+        $records_entry_id=mysql_fetch_assoc($res_entry_id);
+        if($records_entry_id)
+        {
+            $entry_id=$records_entry_id['entry_id'];
+            $object_id=leggi_object_id($entry_id);
+            $name=leggi_nome($object_id);
+            $agi->set_variable("cli",$name); 
+        }else{
+            $agi->set_variable("entry_id","false"); 
+        }
+
+    break;
+
+    case 'test':
+        ///// recupera l' entry_id
+        $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
+        $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
+        $nr_entry_id = mysql_num_rows($res_entry_id);
+        $records_entry_id=mysql_fetch_assoc($res_entry_id);
+        if($records_entry_id)
+        {
+            $entry_id=$records_entry_id['entry_id'];
+            $agi->set_variable("entry_id",$entry_id);
+            $object_id=leggi_object_id($entry_id);
+            $agi->set_variable("object_id",$object_id);
+            $name=leggi_nome($object_id);
+            $agi->set_variable("name",$name);
+            $mail=leggi_mail($object_id);
+            $agi->set_variable("mail",$mail);
+            $company=leggi_company($entry_id);
+            $agi->set_variable("company",$company);
+            $agi->set_variable("nome_coda",$nome_coda);
+        }else{
+            $agi->set_variable("entry_id","false");
+
+        }
+    break;
+
+    case 'apri':
+        $name=$argv[5];
+        $mail=$argv[6];
+        $chiamante=$argv[2];
+        $coda=$argv[3];
+        $dataora=date('r',$argv[4]);
+        $wav=$argv[8];
+        $company=$argv[10];
+        $agi->set_variable("name",$name);
+        $agi->set_variable("mail",$mail);
+        $agi->set_variable("chiamante",$chiamante);
+        $agi->set_variable("dataora",$dataora);
+        $agi->set_variable("wav",$wav);
+        $agi->set_variable("nomecoda",$nomecoda);
+        $agi->set_variable("company",$company);
+
+        $ticket_id=crea_ticket('gen',$name,$mail,$chiamante,$coda,$dataora,'0',$wav,$nome_coda,$company);
+        $agi->set_variable("ticketid",$ticket_id);
+    break;
+    
+    default:
+    break;
+}
+
+function leggi_nome_coda($coda){
+    $sql_nome_coda="SELECT descr FROM asterisk.queues_config WHERE extension='".$coda."' ";
+    $res_nome_coda=mysql_query($sql_nome_coda) OR die(mysql_error());
+    $nr_nome_coda = mysql_num_rows($res_nome_coda);
+    $records_nome_coda=mysql_fetch_assoc($res_nome_coda);
+    if($records_nome_coda)
+    {
+    $nome_coda=$records_nome_coda['descr'];
+    return $nome_coda;
+    }
+
+}
+
+function leggi_company($entry_id){
+    $sql_company="SELECT value FROM zhelpdesk.ost_form_entry_values WHERE field_id=37 AND entry_id='".$entry_id."' ";
+    $res_company=mysql_query($sql_company) OR die(mysql_error());
+    $nr_company = mysql_num_rows($res_company);
+    $records_company=mysql_fetch_assoc($res_company);
+    if($records_company)
+    {
+    $data=$records_company['value'];
+    $company = substr($data, strpos($data, ":") +2);
+    $company = strtok($company, '"');
+    return $company;
+    }
+
+}
+
+function leggi_object_id($entry_id){
+    $sql_object_id="SELECT object_id FROM zhelpdesk.ost_form_entry WHERE id='".$entry_id."' ";
+    $res_object_id=mysql_query($sql_object_id) OR die(mysql_error());
+    $nr_object_id = mysql_num_rows($res_object_id);
+    $records_object_id=mysql_fetch_assoc($res_object_id);
+    if($records_object_id)
+    {
+    $object_id=$records_object_id['object_id'];
+    return $object_id;
+    }
+
+}
+
+function leggi_mail($user_id){
+    ///// recupera la mail
+    $sql_mail="SELECT address FROM zhelpdesk.ost_user_email WHERE user_id='".$user_id."' ";
+    $res_mail=mysql_query($sql_mail) OR die(mysql_error());
+    $nr_mail = mysql_num_rows($res_mail);
+    $records_mail=mysql_fetch_assoc($res_mail);
+    if($records_mail){
+        $mail=$records_mail['address'];
+        return $mail;
+    }
+
+}
+
+function leggi_nome($user_id){
+    ///// recupera il nome
+    $sql_name="SELECT name FROM zhelpdesk.ost_user WHERE id='".$user_id."' ";
+    $res_name=mysql_query($sql_name) OR die(mysql_error());
+    $nr_name = mysql_num_rows($res_name);
+    $records_name=mysql_fetch_assoc($res_name);
+    if($records_name)
+    {
+    $name=$records_name['name'];
+    return $name;
+    }
+}
+
+function crea_ticket($tipo,$name,$mail,$chiamante,$coda,$dataora,$recall,$wav,$nomecoda,$company){
+    // parametri di configurazione di osTicket
+    $config = array(
+        'url'=>'XXX-URLSERVERosTICKET-XXX',
+        'key'=>'XXX-KEYosTICKETAPI-XXX'
+    );
+    // imposto l'id del gruppo a cui assegnare la chiamata
+    switch ($coda) {
+        case '601':
+            $topicID="1";
+        break;
+        case '602':
+            $topicID="14";
+        break;
+        case '603':
+            $topicID="2";
+        break;
+        case '604':
+            $topicID="10";
+        break;
+        case '605':
+            $topicID="27";
+        break;
+        case '606':
+            $topicID="22";
+        break;
+        case '607':
+            $topicID="19";
+        break;
+        case '608':
+            $topicID="15";
+        break;
+        case '609':
+            $topicID="15";
+        break;
+        case '600':
+            $topicID="25";
+        break;
+        case '610':
+            $topicID="15";
+        break;
+
+        default:
+            $topicID="25";
+        break;
+    }
+
+    if (empty($name)) {
+        $name="Utente Generico";
+        $mail="utentegenerico@comune.it";
+        $company="";
+        
+
+    }
+
+    // imposto il testo del messaggio
+    switch ($tipo) {
+        case 'pin':
+            $subject = 'Ticket Generato da '.$name. 'Usando la funzione PIN'; 
+            $message = 'Ticket aperto in automatico da iOffice. Ha Chiamato il numero '.$chiamante.' sulla coda '.$coda.' in data '.$dataora;
+        break;
+
+        case 'numero':
+            $subject = 'Ticket Generato da '.$name. 'Usando il numero del Chiamante' ;
+            $message = 'Ticket aperto in automatico da iOffice. Ha Chiamato il numero '.$chiamante.' sulla coda '.$coda.' in data '.$dataora;
+        break;
+
+        case 'recall':
+            $subject = 'Ticket Generato da '.$name. 'Usando la funzione RECALL ';
+            $message = 'Ticket aperto in automatico da iOffice.Ha Chiamato il numero '.$chiamante.' sulla coda '.$coda.' in data '.$dataora . '. Ha chiesto di essere richiamato al numero '.$recall;
+        break;
+
+        case 'test':
+            $subject = 'Ticket Generato da '.$name. 'Usando la funzione TEST ';
+            $message = 'Ticket aperto in automatico da iOffice.Ha Chiamato il numero '.$chiamante.' sulla coda '.$coda.' in data '.$dataora ;
+        break;
+
+        case 'gen':
+            $subject = 'Ticket Generato da '.$name .' - '.$company;
+            $message = 'Ticket aperto in automatico da iOffice.Ha Chiamato il numero '.$chiamante.' sulla coda '.$coda.' ( '.$nomecoda.' ) in data '.$dataora ;
+        break;
+        
+        default:
+            # code...
+            break;
+    }
+
+    // controllo se è presente un allegato vocale
+    if(empty($wav)){
+        // json con parametri per apertura ticket
+        $data = array(
+            'name'          =>      '"'.$name.'"',
+            'email'         =>      "$mail",
+            'subject'       =>      $subject,
+            'message'       =>      $message,
+            'source'       =>      "API",
+            'topicId'       =>      $topicID,
+            "ip"            =>      "XXX-IPSERVERosTICKET-XXX"
+        );
+    }else{
+        // json con parametri per apertura ticket e file allegato
+         $data = array(
+            'name'          =>      '"'.$name.'"',
+            'email'         =>      "$mail",
+            'subject'       =>      $subject,
+            'message'       =>      $message,
+            'phone'         =>      $chiamante,
+            'topicId'       =>      $topicID,
+            'attachments'   =>    array()
+        );
+
+        // Allegato
+        $data['attachments'][] =
+        array('messaggio.wav' =>
+            'data:mpeg;base64,' .
+            base64_encode(file_get_contents($wav))
+        );
+    }
+    
+    #pre-checks
+    function_exists('curl_version') or die('CURL support required');
+    function_exists('json_encode') or die('JSON support required');
+    
+    #set timeout
+    set_time_limit(30);
+    
+    #curl post
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $config['url']);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_USERAGENT, 'osTicket API Client v1.0 Raffaele Ghironi');
+    curl_setopt($ch, CURLOPT_HEADER, FALSE);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array( 'Expect:', 'X-API-Key: '.$config['key']));
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, FALSE);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    $result=curl_exec($ch);
+    $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($code != 201){
+        return false;
+       //$agi->set_variable("ticketid","false");
+        die('Unable to create ticket: '.$result);
+        
+    }
+    
+    
+    
+    $ticket_id = (int) $result;
+    return $ticket_id;
+    
+    
+
+}
+
+
+
+
+
+
+
+?>
