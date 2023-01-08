@@ -1,6 +1,6 @@
 # Asterisk-osTicket
 
-Tramite questi script scritti in linguaggio nativo Asterisk e Php è possibile aprire automaticamente un ticket sulla piattaforma osTicket(https://osticket.com) semplicemente gestendo una chiamate entrante su di un pbx Asterisk.
+Tramite questi script scritti in linguaggio nativo Asterisk e Php è possibile aprire automaticamente un ticket sulla piattaforma osTicket(https://osticket.com) semplicemente gestendo una chiamata entrante su di un pbx Asterisk.
 Qui sotto un esempio di un Call Flow di una chiamata entrante gestita da questi script.
 
 Through these scripts written in Asterisk native language and Php it is possible to automatically open a ticket on the osTicket(https://osticket.com) platform simply by managing an incoming call on an Asterisk pbx.
