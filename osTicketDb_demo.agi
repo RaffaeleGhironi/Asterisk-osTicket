@@ -15,7 +15,7 @@ $dbuser_a = "XXX-ASTERISKDBUSER-XXX";
 $dbpass_a = "XXX-ASTERISKDNPASSWORS-XXX";
 $conn_a=mysql_connect($dbhost_a,$dbuser_a,$dbpass_a)or die("impossibile accedere");
 ////////////////////////////////////////////
-//leggi il nome della coda
+
 $nome_coda=leggi_nome_coda($coda);
 mysql_close();
 
@@ -32,7 +32,6 @@ switch ($tipo) {
     case 'pin':
         $pin=$argv[5];
         $agi->set_variable("pin",$pin);
-        ///// recupera l' entry_id
         $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$pin."' ";
         $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
         $nr_entry_id = mysql_num_rows($res_entry_id);
@@ -57,7 +56,6 @@ switch ($tipo) {
     break;
 
     case 'numero':        
-        ///// recupera l' entry_id
         $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
         $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
         $nr_entry_id = mysql_num_rows($res_entry_id);
@@ -84,7 +82,7 @@ switch ($tipo) {
     case 'recall':
         $recall=$argv[5];
         $agi->set_variable("recall",$recall); 
-        ///// recupera lo user_id
+        
         $sql_user_id="select user_id from osticket.ost_user__cdata where  phone ='".$chiamante."' ";
         $res_user_id=mysql_query($sql_user_id) OR die(mysql_error());
         $nr_user_id = mysql_num_rows($res_user_id);
@@ -105,8 +103,7 @@ switch ($tipo) {
         }
     break;
 
-    case 'cli':        
-        ///// recupera l' entry_id
+    case 'cli':
         $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
         $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
         $nr_entry_id = mysql_num_rows($res_entry_id);
@@ -124,7 +121,6 @@ switch ($tipo) {
     break;
 
     case 'test':
-        ///// recupera l' entry_id
         $sql_entry_id="select entry_id from zhelpdesk.ost_form_entry_values where  value ='".$chiamante."' ";
         $res_entry_id=mysql_query($sql_entry_id) OR die(mysql_error());
         $nr_entry_id = mysql_num_rows($res_entry_id);
@@ -214,7 +210,6 @@ function leggi_object_id($entry_id){
 }
 
 function leggi_mail($user_id){
-    ///// recupera la mail
     $sql_mail="SELECT address FROM zhelpdesk.ost_user_email WHERE user_id='".$user_id."' ";
     $res_mail=mysql_query($sql_mail) OR die(mysql_error());
     $nr_mail = mysql_num_rows($res_mail);
@@ -227,7 +222,6 @@ function leggi_mail($user_id){
 }
 
 function leggi_nome($user_id){
-    ///// recupera il nome
     $sql_name="SELECT name FROM zhelpdesk.ost_user WHERE id='".$user_id."' ";
     $res_name=mysql_query($sql_name) OR die(mysql_error());
     $nr_name = mysql_num_rows($res_name);
@@ -245,7 +239,6 @@ function crea_ticket($tipo,$name,$mail,$chiamante,$coda,$dataora,$recall,$wav,$n
         'url'=>'XXX-URLSERVERosTICKET-XXX',
         'key'=>'XXX-KEYosTICKETAPI-XXX'
     );
-    // imposto l'id del gruppo a cui assegnare la chiamata
     switch ($coda) {
         case '601':
             $topicID="1";
@@ -288,13 +281,13 @@ function crea_ticket($tipo,$name,$mail,$chiamante,$coda,$dataora,$recall,$wav,$n
 
     if (empty($name)) {
         $name="Utente Generico";
-        $mail="utentegenerico@comune.it";
+        $mail="utentegenerico@dominio.it";
         $company="";
         
 
     }
 
-    // imposto il testo del messaggio
+    
     switch ($tipo) {
         case 'pin':
             $subject = 'Ticket Generato da '.$name. 'Usando la funzione PIN'; 
@@ -326,9 +319,9 @@ function crea_ticket($tipo,$name,$mail,$chiamante,$coda,$dataora,$recall,$wav,$n
             break;
     }
 
-    // controllo se è presente un allegato vocale
+   
     if(empty($wav)){
-        // json con parametri per apertura ticket
+       
         $data = array(
             'name'          =>      '"'.$name.'"',
             'email'         =>      "$mail",
@@ -339,7 +332,7 @@ function crea_ticket($tipo,$name,$mail,$chiamante,$coda,$dataora,$recall,$wav,$n
             "ip"            =>      "XXX-IPSERVERosTICKET-XXX"
         );
     }else{
-        // json con parametri per apertura ticket e file allegato
+        
          $data = array(
             'name'          =>      '"'.$name.'"',
             'email'         =>      "$mail",
